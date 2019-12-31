@@ -19,6 +19,8 @@ const db = knex({
   }
 });
 
+const main = require('./main')
+
 app.get("/data", (req, res) => {
   db.select("*")
     .from("users")
@@ -34,60 +36,11 @@ app.get("/networkusers", (req, res) => {
       res.send(data);
     });
 });
-/*
-app.post("/cb", (req, res) => {
- 
-  const { loginuser, userid, ischecked } = req.body;
-  console.log(loginuser, userid, ischecked);
-  
-  return db("users")
-    .where({ email: email })
-    .update({ ischecked: ischecked }, ["email"])
-    .then(arr => arr.length && res.status(200).json({ email: arr[0] }));
-    
-  if (ischecked) {
-    console.log("flag is true");
-    db.transaction(trx => {
-      trx
-        .insert({
-          id: loginuser,
-          connections: userid
-        })
-        .into("networkusers")
-        .returning("id", "connections")
-        .then(() => {
-          console.log("committing");
-          trx.commit();
-        })
-        .catch(error => {
-          console.log("error", error);
-          trx.rollback();
-        });
-    }).catch(err => res.status(400).json(err));
-  } else {
-    console.log("flag is false");
-    db.transaction(trx => {
-      db("networkusers")
-        .where("id", "=", loginuser)
-        .andWhere("connections", "=", userid)
-        .del()
-        .returning("id", "connections")
-        .then(() => {
-          console.log("committing");
-          trx.commit();
-        })
-        .catch(error => {
-          console.log("error", error);
-          trx.rollback();
-        });
-    }).catch(err => res.status(400).json(err));
-  }
-});
-*/
+
 
 app.post("/cb", (req, res) => {
  
-  const { loginuser, userid, ischecked } = req.body;
+  const { loginuser, userid, ischecked} = req.body;
   console.log(loginuser, userid, ischecked);
   
   if (ischecked) {
@@ -95,6 +48,7 @@ app.post("/cb", (req, res) => {
        db('networkusers').insert({
           id: loginuser,
           connections: userid
+
         })
         .returning('*')
         .then(item => {
@@ -199,39 +153,15 @@ app.get("/profile/:id", (req, res) => {
     .catch(err => res.status(400).json("error getting user"));
 });
 
-app.post("/suggest", (req, res) => {
-  const {
-    location,
-    restaurant,
-    resdescription,
-    attractions,
-    attdescription
-  } = req.body;
-  database.suggest.push({
-    id: "455",
-    location: location,
-    restaurant: restaurant,
-    resdescription: resdescription,
-    attractions: attractions,
-    attdescription: attdescription
-  });
-  //grab the last user
-  res.json(database.suggest[database.suggest.length - 1]);
-});
+app.get('/', (req, res) => res.send('hello world'))
+app.get('/crud', (req, res) => main.getTableData(req, res, db))
+app.post('/crud', (req, res) => main.postTableData(req, res, db))
+app.put('/crud', (req, res) => main.putTableData(req, res, db))
+app.delete('/crud', (req, res) => main.deleteTableData(req, res, db))
 
-app.get("/suggestion/:id", (req, res) => {
-  const { id } = req.params;
-  let found = false;
-  database.suggest.forEach(sugg => {
-    if (sugg.id === id) {
-      found = true;
-      return res.json(sugg);
-    }
-  });
-  if (!found) {
-    res.status(400).json("not found");
-  }
-});
+
+
+
 
 app.listen(3000, () => {
   console.log("app is running on port 3000");
