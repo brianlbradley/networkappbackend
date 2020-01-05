@@ -11,10 +11,10 @@ const getTableData= (req, res, db) => {
 }
 
 const postTableData = (req, res, db) => {
-  const { name, location, restaurant, skills, hobbies,userid } = req.body
-  console.log(userid)
+  const { id, name, location, restaurant, skills, hobbies } = req.body
+ 
   const added = new Date()
-  db('suggesttable').insert({connections:userid, name, location, restaurant, skills, hobbies, added})
+  db('suggesttable').insert({ name, location, restaurant, skills, hobbies, added})
     .returning('*')
     .then(item => {
       res.json(item)
